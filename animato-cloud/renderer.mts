@@ -990,6 +990,21 @@ ${part >= last ? '- The title must NOT contain "(Part ...)" if the story ends he
   }
 }
 
+/**
+ * The reach playbook every writer prompt carries. Nothing can guarantee views, so this does not promise them;
+ * it makes each video as strong as it can be on the things that actually drive watch time, shares and search.
+ */
+const REACH_PLAYBOOK = `MAKE IT SPREAD (what separates videos people finish and share from videos people swipe past)
+- THE FIRST 2 SECONDS decide everything. Scene 1 must open mid-action on the single most surprising, valuable or emotional fact, a bold specific claim, or a question the viewer needs answered. Never start with a greeting, a channel intro, "today we", "have you ever wondered" or background. Lead with the payoff, then earn it.
+- OPEN A LOOP, THEN PAY IT OFF. Tease one concrete thing the viewer will only learn at the end ("and the third one is the reason it works"), and deliver it in the last scene. Re-hook every 2-3 scenes with a twist, a number, a contrast or a new question so there is never a flat stretch.
+- ONE IDEA, ONE EMOTION. Pick a single dominant feeling (awe, curiosity, outrage, fear, joy, nostalgia, "I need to know") and build every scene toward it. Be specific: real names, exact numbers, concrete details beat vague claims every time.
+- PACE. Cut every filler word and every sentence that does not add a new fact, feeling or turn. Short lines, active verbs, no throat-clearing. Vary the rhythm so it never drones.
+- THE ENDING EARNS THE REPLAY AND THE SHARE. Land a clean payoff, then close with a line that makes the viewer want to send it to someone, argue in the comments or watch again (a take people will disagree with, a "tag the person who..." moment, or an ending that loops back to the first line). One specific call to action only.
+- THE TITLE is a promise the video keeps: 45-70 characters, the main search keyword near the front, one specific curiosity gap or benefit, a real number or name when there is one. It must be completely true to the video. No false clickbait (it destroys retention and gets videos suppressed).
+- THE DESCRIPTION: the first 2 lines are what shows before "more", so put the hook and the main keyword there, then useful detail that matches what is said, then a comment-bait question.
+- HASHTAGS: only specific ones for this exact subject and niche (people, product, place, topic) that people really search. The first 3 appear above the title, so make them the most specific and searchable. Never use reach-bait like #viral or #fyp; it signals spam and brings the wrong audience.
+- Never invent facts, quotes, statistics or events. Everything stated must be true or clearly framed as opinion or speculation.`;
+
 function buildPrompt(pastStory: string, pastTitles: string[], headlines: any[], pack: FactPack | null = null): string {
   const L = lengthSpec();
   const avoid = pastTitles.length ? `\nPrevious video titles (do NOT repeat these topics): ${pastTitles.slice(-35).join(' | ')}` : '';
@@ -1001,6 +1016,8 @@ RULES
 - Write for the ear: short sentences, concrete words, no emojis, no hashtags, no stage directions, no "In this video".
 - Suitable for a general YouTube audience (PG-13): tension and mystery are great; no gore, no graphic violence, no self-harm, nothing sexual.
 - Every scene gets its own image that shows exactly what is being said at that moment.
+
+${REACH_PLAYBOOK}
 
 PERFORMANCE TAGS (the presenter is an animated character with a face, head, arms and hands; it performs tags you write INSIDE "narration")
 - Put a tag right before the word where the change should land. Tags are never spoken or shown as captions.
@@ -1369,7 +1386,7 @@ async function generateScript(pastStory: string, pastTitles: string[], pastSourc
   const headlines = (CFG.category === 'tech' || CFG.category === 'news') ? await recentHeadlines(pastTitles, pastSources) : [];
   const pack = CFG.category === 'stories' ? null : await researchFor(pastTitles, headlines);
   const prompt = buildPrompt(pastStory, pastTitles, pack?.headline ? [pack.headline] : headlines, pack);
-  const system = 'You are an award-winning short-form video writer and director. Your videos open with an irresistible hook, make complete sense, stay engaging every single second and end with a reason to follow. You answer with one valid JSON object and nothing else.';
+  const system = 'You are a top-performing short-form video strategist, writer and director whose videos consistently earn high retention, shares and comments. You obsess over the first two seconds, curiosity loops, specific details, relentless pacing and a payoff that makes people share. You package every video with a keyword-rich, honest title, a strong description and precise hashtags. You never invent facts and never use misleading clickbait. You answer with one valid JSON object and nothing else.';
   let nearMiss: { script: Script; words: number } | null = null;
   let lastError = '';
   const withSources = (sc: Script) => {
