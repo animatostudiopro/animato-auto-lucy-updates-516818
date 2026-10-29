@@ -374,16 +374,17 @@ const AUTO_PERSONALITIES = ['warm and funny', 'sharp skeptic', 'hype energy', 'c
 /** A brand-new cast for one episode: names, genders, personalities and face seeds (deterministic per episode). */
 function autoCast(seed: string, n: number, avoid: string[] = []): { autoHost: true; name: string; gender: 'female' | 'male'; personality: string; seed: string }[] {
   let h = 2166136261; for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
-  const r = () => { h = Math.imul(h ^ (h >>> 13), 0x5bd1e995) >>> 0; h ^= h >>> 15; return (h % 100000) / 100000; };
+  const r = () => { h = Math.imul(h ^ (h >>> 13), 0x5bd1e995) >>> 0; h ^= h >>> 15; h >>>= 0; return (h % 100000) / 100000; };
   const out: { autoHost: true; name: string; gender: 'female' | 'male'; personality: string; seed: string }[] = [];
   const used = new Set(avoid.map((x) => String(x ?? '').toLowerCase()));
   const usedP = new Set<string>();
   for (let i = 0; i < n; i++) {
     const gender: 'female' | 'male' = i === 0 ? (r() < 0.5 ? 'female' : 'male') : (out[i - 1].gender === 'female' ? (r() < 0.7 ? 'male' : 'female') : (r() < 0.7 ? 'female' : 'male'));
     const list = AUTO_NAMES[gender];
-    let name = list[Math.floor(r() * list.length)];
-    for (let k = 0; k < 10 && used.has(name.toLowerCase()); k++) name = list[Math.floor(r() * list.length)];
-    used.add(name.toLowerCase());
+    const pick = () => list[Math.min(list.length - 1, Math.max(0, Math.floor(r() * list.length)))] || list[0] || 'Alex';
+    let name = pick();
+    for (let k = 0; k < 10 && used.has(String(name).toLowerCase()); k++) name = pick();
+    used.add(String(name).toLowerCase());
     let personality = AUTO_PERSONALITIES[Math.floor(r() * AUTO_PERSONALITIES.length)];
     for (let k = 0; k < 6 && usedP.has(personality); k++) personality = AUTO_PERSONALITIES[Math.floor(r() * AUTO_PERSONALITIES.length)];
     usedP.add(personality);
